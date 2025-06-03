@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "DeepLCmdPal (Package)": {
+      "commandName": "MsixPackage",
+      "doNotLaunchApp": true
+    },
+    "DeepLCmdPal (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
