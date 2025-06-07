@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace DeepLCmdPal.Model
 {
-    public class TranslationHistory
+    public class TranslationEntity
     {
         [JsonPropertyName(nameof(OriginalText))]
         public string OriginalText { get; set; }

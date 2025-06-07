@@ -18,7 +18,7 @@ public partial class DeepLCmdPalCommandsProvider : CommandProvider
     public DeepLCmdPalCommandsProvider()
     {
         DisplayName = "DeepLCmdPal";
-        Icon = IconHelpers.FromRelativePath("Assets\\Logo.svg");
+        Icon = IconHelpers.FromRelativePath("Assets\\StoreLogo.png");
         Settings = _settingsManager.Settings;
 
         _commands = [

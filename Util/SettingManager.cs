@@ -66,7 +66,6 @@ namespace DeepLCmdPal.Util
             var directory = Utilities.BaseSettingsPath("Microsoft.CmdPal");
             Directory.CreateDirectory(directory);
 
-            // now, the state is just next to the exe
             return Path.Combine(directory, "settings.json");
         }
 
@@ -75,11 +74,10 @@ namespace DeepLCmdPal.Util
             var directory = Utilities.BaseSettingsPath("Microsoft.CmdPal");
             Directory.CreateDirectory(directory);
 
-            // now, the state is just next to the exe
             return Path.Combine(directory, "deepl_cmdpal_history.json");
         }
 
-        public void SaveHistory(TranslationHistory historyItem)
+        public void SaveHistory(TranslationEntity historyItem)
         {
             if (historyItem == null)
             {
@@ -88,31 +86,27 @@ namespace DeepLCmdPal.Util
 
             try
             {
-                List<TranslationHistory> historyItems;
+                List<TranslationEntity> historyItems;
 
-                // Check if the file exists and load existing history
                 if (File.Exists(_historyPath))
                 {
                     var existingContent = File.ReadAllText(_historyPath);
-                    historyItems = JsonSerializer.Deserialize<List<TranslationHistory>>(existingContent) ?? [];
+                    historyItems = JsonSerializer.Deserialize<List<TranslationEntity>>(existingContent) ?? [];
                 }
                 else
                 {
                     historyItems = [];
                 }
 
-                // Add the new history item
                 historyItems.Add(historyItem);
 
                 historyItems = historyItems.DistinctBy(x => x.TranslatedText).ToList();
 
-                // Determine the maximum number of items to keep based on ShowHistory
                 if (int.TryParse(ShowHistory, out var maxHistoryItems) && maxHistoryItems > 0)
                 {
-                    // Keep only the most recent `maxHistoryItems` items
                     while (historyItems.Count > maxHistoryItems)
                     {
-                        historyItems.RemoveAt(0); // Remove the oldest item
+                        historyItems.RemoveAt(0);
                     }
                 }
 
@@ -134,24 +128,20 @@ namespace DeepLCmdPal.Util
                     return [];
                 }
 
-                // Read and deserialize JSON into a list of HistoryItem objects
                 var fileContent = File.ReadAllText(_historyPath);
-                var historyItems = JsonSerializer.Deserialize<List<TranslationHistory>>(fileContent) ?? [];
+                var historyItems = JsonSerializer.Deserialize<List<TranslationEntity>>(fileContent) ?? [];
 
-                // Convert each HistoryItem to a ListItem
                 var listItems = new List<ListItem>();
                 foreach (var historyItem in historyItems)
                 {
                     try
                     {
-                        // Check if historyItem is null
                         if (historyItem == null)
                         {
                             ExtensionHost.LogMessage(new LogMessage() { Message = "Null history item found, skipping." });
                             continue;
                         }
 
-                        // Check if required fields are null
                         if (historyItem.OriginalText == null ||
                             historyItem.TranslatedText == null ||
                             historyItem.OriginalLangCode == null ||
@@ -163,12 +153,9 @@ namespace DeepLCmdPal.Util
 
                         listItems.Add(new ListItem(new ResultCopyCommand(historyItem, this))
                         {
-                            Icon = IconHelpers.FromRelativePath("Assets\\Logo.svg"),
+                            Icon = IconHelpers.FromRelativePath("Assets\\StoreLogo.png"),
                             Title = historyItem.TranslatedText,
-                            Details = new Details()
-                            {
-                                Body = historyItem.OriginalText
-                            },
+                            Subtitle = historyItem.OriginalText,
                             Tags = [new Tag($"{historyItem.OriginalLangCode} -> {historyItem.TargetLangCode}")],
                         });
                     }
@@ -197,7 +184,6 @@ namespace DeepLCmdPal.Util
             Settings.Add(_targetLang);
             Settings.Add(_apiKey);
 
-            // Load settings from file upon initialization
             LoadSettings();
 
             Settings.SettingsChanged += (s, a) => SaveSettings();
@@ -209,21 +195,17 @@ namespace DeepLCmdPal.Util
             {
                 if (File.Exists(_historyPath))
                 {
-                    // Delete the history file
                     File.Delete(_historyPath);
 
-                    // Log that the history was successfully cleared
                     ExtensionHost.LogMessage(new LogMessage() { Message = "History cleared successfully." });
                 }
                 else
                 {
-                    // Log that there was no history file to delete
                     ExtensionHost.LogMessage(new LogMessage() { Message = "No history file found to clear." });
                 }
             }
             catch (Exception ex)
             {
-                // Log any exception that occurs
                 ExtensionHost.LogMessage(new LogMessage() { Message = $"Failed to clear history: {ex}" });
             }
         }
@@ -239,21 +221,17 @@ namespace DeepLCmdPal.Util
                 }
                 else if (int.TryParse(ShowHistory, out var maxHistoryItems) && maxHistoryItems > 0)
                 {
-                    // Trim the history file if there are more items than the new limit
                     if (File.Exists(_historyPath))
                     {
                         var existingContent = File.ReadAllText(_historyPath);
-                        var historyItems = JsonSerializer.Deserialize<List<TranslationHistory>>(existingContent) ?? [];
+                        var historyItems = JsonSerializer.Deserialize<List<TranslationEntity>>(existingContent) ?? [];
 
                         historyItems = historyItems.DistinctBy(x => x.TranslatedText).ToList();
 
-                        // Check if trimming is needed
                         if (historyItems.Count > maxHistoryItems)
                         {
-                            // Trim the list to keep only the most recent `maxHistoryItems` items
                             historyItems = historyItems.Skip(historyItems.Count - maxHistoryItems).ToList();
 
-                            // Save the trimmed history back to the file
                             var trimmedHistoryJson = JsonSerializer.Serialize(historyItems);
                             File.WriteAllText(_historyPath, trimmedHistoryJson);
                         }

@@ -1,5 +1,5 @@
-﻿using DeepLCmdPal.Enum;
-using DeepLCmdPal.Model;
+﻿using DeepLCmdPal.DTO;
+using DeepLCmdPal.Enum;
 
 using System;
 using System.Net;
@@ -18,7 +18,7 @@ namespace DeepLCmdPal.Job
         private const int InitialRetryDelayMs = 1000;
         private static readonly Random Random = new Random();
 
-        public static async Task<TranslationResult> Translation(LangCode.Code targetCode, string text, string apiKey)
+        public static async Task<TranslationResultDTO> Translation(LangCode.Code targetCode, string text, string apiKey)
         {
             if (httpClient == null || oldAPIKey != apiKey)
             {
@@ -51,7 +51,7 @@ namespace DeepLCmdPal.Job
                             string responseString = await response.Content.ReadAsStringAsync();
                             if (responseString != null)
                             {
-                                var result = JsonSerializer.Deserialize<TranslationResult>(responseString);
+                                var result = JsonSerializer.Deserialize<TranslationResultDTO>(responseString);
                                 if (result != null)
                                 {
                                     result.TargetLangCode = LangCode.ToString(targetCode);
@@ -95,12 +95,12 @@ namespace DeepLCmdPal.Job
             return CreateErrorResult(Properties.Resource.error_message_during_translation, targetCode);
         }
 
-        private static TranslationResult CreateErrorResult(string message, LangCode.Code targetCode)
+        private static TranslationResultDTO CreateErrorResult(string message, LangCode.Code targetCode)
         {
-            return new TranslationResult
+            return new TranslationResultDTO
             {
                 Translations = [
-                    new Translation
+                    new TranslationDTO
                 {
                     DetectedSourceLanguage = LangCode.ToString(LangCode.Code.UNK),
                     Text = message

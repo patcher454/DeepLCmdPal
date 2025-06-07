@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace DeepLCmdPal.Model
+namespace DeepLCmdPal.DTO
 {
-    public class Translation
+    public class TranslationDTO
     {
         [JsonPropertyName("detected_source_language")]
         public string DetectedSourceLanguage { get; set; }

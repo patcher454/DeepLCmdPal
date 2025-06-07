@@ -2,6 +2,7 @@
 // The Microsoft Corporation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using DeepLCmdPal.DTO;
 using DeepLCmdPal.Enum;
 using DeepLCmdPal.Job;
 using DeepLCmdPal.Model;
@@ -20,11 +21,11 @@ internal sealed partial class DeepLCmdPalPage : DynamicListPage, IDisposable
 {
     private List<ListItem> _allItems;
     private readonly SettingsManager _settingsManager;
-    private static Task<TranslationResult> translationTask = null;
+    private static Task<TranslationResultDTO> translationTask = null;
 
     public DeepLCmdPalPage(SettingsManager settingsManager)
     {
-        Icon = IconHelpers.FromRelativePath("Assets\\Logo.svg");
+        Icon = IconHelpers.FromRelativePath("Assets\\StoreLogo.png");
         Title = "DeepLCmdPal";
         Name = "Open";
         _settingsManager = settingsManager;
@@ -33,7 +34,14 @@ internal sealed partial class DeepLCmdPalPage : DynamicListPage, IDisposable
 
     public override async void UpdateSearchText(string oldSearch, string newSearch)
     {
-        if (newSearch == oldSearch || string.IsNullOrWhiteSpace(newSearch))
+        if (string.IsNullOrWhiteSpace(newSearch))
+        {
+            _allItems = _settingsManager.LoadHistory();
+            RaiseItemsChanged(_allItems.Count);
+            return;
+        }
+
+        if (newSearch == oldSearch)
         {
             return;
         }
@@ -50,22 +58,20 @@ internal sealed partial class DeepLCmdPalPage : DynamicListPage, IDisposable
         _allItems = [];
         foreach (var item in result.Translations)
         {
-            var translation = new TranslationHistory
+            var translation = new TranslationEntity
             {
-                OriginalText = result.OriginalText,
+                OriginalText = text,
                 OriginalLangCode = item.DetectedSourceLanguage,
                 TranslatedText = item.Text,
                 TargetLangCode = result.TargetLangCode,
+                Timestamp = DateTime.Now
             };
 
             _allItems.Add(new ListItem(new ResultCopyCommand(translation, _settingsManager))
             {
-                Icon = IconHelpers.FromRelativePath("Assets\\Logo.svg"),
+                Icon = IconHelpers.FromRelativePath("Assets\\StoreLogo.png"),
                 Title = translation.TranslatedText,
-                Details = new Details()
-                {
-                    Body = translation.OriginalText
-                },
+                Subtitle = translation.OriginalText,
                 Tags = [new Tag($"{translation.OriginalLangCode} -> {translation.TargetLangCode}")],
             });
         }

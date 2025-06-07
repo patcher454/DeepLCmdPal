@@ -12,9 +12,9 @@ namespace DeepLCmdPal.Util
     {
         private readonly SettingsManager _settingsManager;
 
-        public TranslationHistory Arguments { get; set; }
+        public TranslationEntity Arguments { get; set; }
 
-        public ResultCopyCommand(TranslationHistory arguments, SettingsManager settingsManager)
+        public ResultCopyCommand(TranslationEntity arguments, SettingsManager settingsManager)
         {
             if (arguments == null)
             {
@@ -29,6 +29,8 @@ namespace DeepLCmdPal.Util
             Arguments = arguments;
 
             _settingsManager = settingsManager;
+
+            Name = "Copy";
         }
 
         public override CommandResult Invoke()

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <RootNamespace>DeepLCmdPal</RootNamespace>
@@ -14,12 +14,6 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-  <ItemGroup>
-    <Content Remove="Assets\Logo.svg" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Assets\Logo.svg" />
-  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
@@ -28,10 +22,6 @@
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\Logo.svg" />
   </ItemGroup>
 
   <ItemGroup>
