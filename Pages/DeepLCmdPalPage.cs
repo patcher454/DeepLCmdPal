@@ -62,7 +62,7 @@ internal sealed partial class DeepLCmdPalPage : DynamicListPage, IDisposable
             {
                 OriginalText = text,
                 OriginalLangCode = item.DetectedSourceLanguage,
-                TranslatedText = item.Text,
+                TranslatedText = item.Text.TrimStart(),
                 TargetLangCode = result.TargetLangCode,
                 Timestamp = DateTime.Now
             };
