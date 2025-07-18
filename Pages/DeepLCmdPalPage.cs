@@ -13,6 +13,7 @@ using Microsoft.CommandPalette.Extensions.Toolkit;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DeepLCmdPal;
@@ -46,37 +47,45 @@ internal sealed partial class DeepLCmdPalPage : DynamicListPage, IDisposable
             return;
         }
 
+        if (translationTask != null && !translationTask.IsCompleted)
+        {
+            return;
+        }
+
         var (targetCode, text) = InputInterpreter.Parse(newSearch, LangCode.Parse(_settingsManager.DefaultTargetLang));
 
-        if (translationTask == null || translationTask.IsCompleted)
+        try
         {
             translationTask = JobHttp.Translation(targetCode, text, _settingsManager.DeepLAPIKey);
-        }
+            var result = await translationTask;
 
-        var result = translationTask.GetAwaiter().GetResult();
-       
-        _allItems = [];
-        foreach (var item in result.Translations)
+            _allItems.Clear();
+            foreach (var item in result.Translations)
+            {
+                var translation = new TranslationEntity
+                {
+                    OriginalText = text,
+                    OriginalLangCode = item.DetectedSourceLanguage,
+                    TranslatedText = item.Text.TrimStart(),
+                    TargetLangCode = result.TargetLangCode,
+                    Timestamp = DateTime.Now
+                };
+
+                _allItems.Add(new ListItem(new ResultCopyCommand(translation, _settingsManager))
+                {
+                    Icon = IconHelpers.FromRelativePath("Assets\\StoreLogo.png"),
+                    Title = translation.TranslatedText,
+                    Subtitle = translation.OriginalText,
+                    Tags = [new Tag($"{translation.OriginalLangCode} -> {translation.TargetLangCode}")],
+                });
+            }
+            RaiseItemsChanged(_allItems.Count);
+        }
+        catch (Exception)
         {
-            var translation = new TranslationEntity
-            {
-                OriginalText = text,
-                OriginalLangCode = item.DetectedSourceLanguage,
-                TranslatedText = item.Text.TrimStart(),
-                TargetLangCode = result.TargetLangCode,
-                Timestamp = DateTime.Now
-            };
-
-            _allItems.Add(new ListItem(new ResultCopyCommand(translation, _settingsManager))
-            {
-                Icon = IconHelpers.FromRelativePath("Assets\\StoreLogo.png"),
-                Title = translation.TranslatedText,
-                Subtitle = translation.OriginalText,
-                Tags = [new Tag($"{translation.OriginalLangCode} -> {translation.TargetLangCode}")],
-            });
+            _allItems.Clear();
+            RaiseItemsChanged(_allItems.Count);
         }
-
-        RaiseItemsChanged(_allItems.Count);
     }
 
     public override IListItem[] GetItems()
